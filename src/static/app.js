@@ -81,6 +81,50 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Function to fetch and render the daily Last Mile news report
+  async function fetchNewsReport() {
+    const newsDate = document.getElementById("news-date");
+    const newsSummary = document.getElementById("news-summary");
+    const newsList = document.getElementById("news-list");
+
+    try {
+      const response = await fetch("/news/daily");
+      const report = await response.json();
+
+      newsDate.textContent = `Report Date: ${report.report_date}`;
+      newsSummary.textContent = report.summary;
+      newsSummary.classList.remove("hidden");
+
+      newsList.innerHTML = "";
+
+      report.competitors.forEach((competitor) => {
+        const card = document.createElement("div");
+        card.className = "news-card";
+
+        const focusTags = competitor.focus_areas
+          .map((area) => `<span class="focus-tag">${area}</span>`)
+          .join(" ");
+
+        const highlights = competitor.last_mile_highlights
+          .map((h) => `<li>${h}</li>`)
+          .join("");
+
+        card.innerHTML = `
+          <h4>${competitor.name}</h4>
+          <p class="competitor-desc">${competitor.description}</p>
+          <div class="focus-tags">${focusTags}</div>
+          <ul class="highlights-list">${highlights}</ul>
+        `;
+
+        newsList.appendChild(card);
+      });
+    } catch (error) {
+      newsDate.textContent = "Failed to load news report. Please try again later.";
+      console.error("Error fetching news report:", error);
+    }
+  }
+
   // Initialize app
   fetchActivities();
+  fetchNewsReport();
 });
